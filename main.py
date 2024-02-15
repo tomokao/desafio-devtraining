@@ -19,7 +19,7 @@ HEAD_ROW_INDEX = 3
 class ColumnKey(str, Enum):
     ID = "Matricula"
     STUDENT = "Aluno"
-    ABSCENCES = "Faltas"
+    ABSENCES = "Faltas"
     P1 = "P1"
     P2 = "P2"
     P3 = "P3"
@@ -31,7 +31,7 @@ class ColumnKey(str, Enum):
 
 
 @click.command(
-    help="""Program to calculate student approval situations based on their test scores and abscences.
+    help="""Program to calculate student approval situations based on their test scores and absences.
 
 SHEET_ID may be the URL, key or name of the spreadsheet."""
 )
@@ -103,7 +103,7 @@ def main(spreadsheet_id: str):
         logger.info(f"Computing situation for student {student_name} ({student_id})...")
 
         (situation, naf) = compute_student_situation(
-            abscences=record[ColumnKey.ABSCENCES],
+            absences=record[ColumnKey.ABSENCES],
             p1=record[ColumnKey.P1],
             p2=record[ColumnKey.P2],
             p3=record[ColumnKey.P3],
@@ -132,13 +132,13 @@ class StudentSituation(str, Enum):
 
 
 def compute_student_situation(
-    abscences: int,
+    absences: int,
     p1: int,
     p2: int,
     p3: int,
     total_lectures: int,
 ) -> tuple[StudentSituation, int]:
-    """Computes a student's situation and NAF based on their test scores and abscences.
+    """Computes a student's situation and NAF based on their test scores and absences.
 
     The student's situation is determined by the average of their test scores,
     following this table:
@@ -147,14 +147,14 @@ def compute_student_situation(
         5 <= average < 7 -> EXAME_FINAL (final exam)
         average >= 7     -> APROVADO (approved)
 
-    If the number of abscences exceeds 25% of the total amount of lectures,
-    the student will have the REPROVADO_POR_FALTA (failed by abscences) situation.
+    If the number of absences exceeds 25% of the total amount of lectures,
+    the student will have the REPROVADO_POR_FALTA (failed by absences) situation.
 
     If the student's situation is "Exame Final", their "Nota para Aprovação Final" (NAF)
     will be calculated by ceil(10 - average).
 
     Args:
-        abscences: Number of abscences.
+        absences: Number of absences.
         p1: First test score.
         p2: Second test score.
         p3: Third test score.
@@ -175,7 +175,7 @@ def compute_student_situation(
     situation: StudentSituation
     naf: int = 0
 
-    if abscences > (total_lectures / 4):
+    if absences > (total_lectures / 4):
         situation = StudentSituation.REPROVADO_POR_FALTA
     elif average < 5:
         situation = StudentSituation.REPROVADO_POR_NOTA
